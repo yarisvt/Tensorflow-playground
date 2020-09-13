@@ -1,3 +1,5 @@
+import os
+
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, Flatten, Conv2D
 from tensorflow.keras import Model
@@ -79,3 +81,4 @@ for epoch in range(EPOCHS):
         test_step(test_images, test_labels)
 
     print(f'Epoch {epoch + 1}, Loss: {train_loss.result()}, Accuracy: {train_accuracy.result() * 100}, Test loss: {test_loss.result()}, Test Accuracy: {test_accuracy.result() * 100}')
+

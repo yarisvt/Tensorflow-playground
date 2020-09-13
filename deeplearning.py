@@ -1,12 +1,14 @@
 # pylint: disable=E1101
+from __future__ import annotations
 
 import os
 import random
 
 import tensorflow as tf
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
-from typing import List, Tuple, Any, ClassVar, Optional
+from typing import List, Tuple, Any, ClassVar, Optional, NoReturn, Union
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter.messagebox as messagebox
@@ -14,7 +16,7 @@ import tkinter as tk
 
 
 class Network:
-    def __init__(self, input_shape: Tuple[int, int], layers: List[List[Any]], model=None):
+    def __init__(self, input_shape: Tuple[int, int], layers: List[List[Union[int, str]]], model: Optional[tf.python.keras.engine.sequential.Sequential] = None):
         self.input_shape = input_shape
         self.layers = layers
         self.loaded_model = None
@@ -23,7 +25,7 @@ class Network:
         self.load_data()
 
     @classmethod
-    def from_model(cls, file_name: str):
+    def from_model(cls, file_name: str) -> Network:
         model = os.path.join('trained_models', 'digits', file_name)
         loaded_model = tf.keras.models.load_model(model)
         input_shape = None
@@ -35,39 +37,39 @@ class Network:
                 layers.append([layer.units, layer.activation.__name__])
         return cls(input_shape=input_shape, layers=layers, model=loaded_model)
 
-    def load_data(self):
+    def load_data(self) -> NoReturn:
         x_train, y_train, x_test, y_test = load_data()
         self.add_data(x_train, y_train, x_test, y_test)
 
-    def add_data(self, train_data: np.ndarray, train_labels: np.ndarray, test_data: np.ndarray, test_labels: np.ndarray):
+    def add_data(self, train_data: np.ndarray, train_labels: np.ndarray, test_data: np.ndarray, test_labels: np.ndarray) -> NoReturn:
         self.train_data = train_data
         self.train_labels = train_labels
         self.test_data = test_data
         self.test_labels = test_labels
 
-    def create_model(self):
+    def create_model(self) -> NoReturn:
         self.model = tf.keras.models.Sequential()
         self.model.add(tf.keras.layers.Flatten(input_shape=self.input_shape))
         for layer in self.layers:
             self.model.add(tf.keras.layers.Dense(
                 layer[0], activation=self.activation.get(layer[1], '')))
 
-    def compile_model(self, optimizer: str, loss: str, metrics: List[str]):
+    def compile_model(self, optimizer: str, loss: str, metrics: List[str]) -> NoReturn:
         self.model.compile(
             optimizer=optimizer,
             loss=loss,
             metrics=metrics
         )
 
-    def train_model(self, epochs: int):
+    def train_model(self, epochs: int) -> NoReturn:
         self.model.fit(self.train_data, self.train_labels, epochs=epochs)
 
-    def check_accuracy_loss(self):
+    def check_accuracy_loss(self) -> NoReturn:
         val_loss, val_accuracy = self.model.evaluate(
             self.train_data, self.train_labels)
         print(f'loss -> {val_loss}\naccuracy -> {val_accuracy}')
 
-    def save_model(self, file_name: str):
+    def save_model(self, file_name: str) -> NoReturn:
         self.model.save(os.path.join('trained_models', file_name))
 
     def predict(self, image_nr: int) -> int:
@@ -81,12 +83,12 @@ class Network:
         return self.train_data, self.train_labels
 
 
-def draw(image: np.ndarray):
+def draw(image: np.ndarray) -> NoReturn:
     plt.imshow(image, cmap=plt.cm.binary)
     plt.show()
 
 
-def load_data():
+def load_data() -> Tuple[int, int, int, int]:
     mnist = tf.keras.datasets.mnist
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
@@ -96,7 +98,7 @@ def load_data():
 
 
 class GUI:
-    def __init__(self, model='5pochs.h5'):
+    def __init__(self, model: Optional[str] = '5pochs.h5'):
         self.window = tk.Tk()
         self.window.title = 'Predicting images'
         self.net = Network.from_model(model)
@@ -107,7 +109,7 @@ class GUI:
         self.figures = []
         self.create_window(self.get_random_nr())
 
-    def create_window(self, img_range):
+    def create_window(self, img_range: int) -> NoReturn:
         self.figure = plt.figure()
         self.top_frame = tk.Frame(self.window)
         self.bottom_frame = tk.Frame(self.window)
@@ -129,20 +131,20 @@ class GUI:
         self.bottom_frame.pack()
         tk.mainloop()
 
-    def handle_click(self, event):
+    def handle_click(self, event: matplotlib.backend_bases.MouseEvent) -> NoReturn:
         for fig in self.figures:
             if fig[0] == event.inaxes:
                 label, prediction = self.net.predict(fig[1])
                 messagebox.showinfo(
                     'Prediction', f'Prediction: {prediction}\nTrue number: {label}')
 
-    def new_images(self):
+    def new_images(self) -> NoReturn:
         self.top_frame.destroy()
         self.bottom_frame.destroy()
         self.figures = []
         self.create_window(self.get_random_nr())
 
-    def get_random_nr(self):
+    def get_random_nr(self) -> int:
         return random.randrange(len(self.test_data) - 9)
 
 

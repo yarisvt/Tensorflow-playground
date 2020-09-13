@@ -1,7 +1,8 @@
+# pylint: disable=E1101
+
 import os
 
 import tensorflow as tf
-
 from tensorflow.keras import datasets, layers, models
 import matplotlib.pyplot as plt
 
@@ -13,15 +14,15 @@ train_images, test_images = train_images / 255.0, test_images / 255.0
 class_names = ['airplane', 'automible', 'bird', 'cat',
                'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
-# plt.figure(figsize=(10, 10))
-# for i in range(25):
-#     plt.subplot(5, 5, i+1)
-#     plt.xticks([])
-#     plt.yticks([])
-#     plt.grid(False)
-#     plt.imshow(train_images[i], cmap=plt.cm.binary)
-#     plt.xlabel(class_names[train_labels[i][0]])
-# plt.show()
+plt.figure(figsize=(10, 10))
+for i in range(25):
+    plt.subplot(5, 5, i+1)
+    plt.xticks([])
+    plt.yticks([])
+    plt.grid(False)
+    plt.imshow(train_images[i], cmap=plt.cm.binary)
+    plt.xlabel(class_names[train_labels[i][0]])
+plt.show()
 
 model = models.Sequential()
 model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
@@ -40,7 +41,8 @@ model.compile(optimizer='adam',
               metrics=['accuracy'])
 history = model.fit(train_images, train_labels, epochs=10,
                     validation_data=(test_images, test_labels))
-model.save(os.path.join('trained_models', '10epochs_cnn.h5'))
+
+model.save(os.path.join('trained_models', 'clothing', '10epochs_cnn.h5'))
 
 plt.plot(history.history['accuracy'], label='accuracy')
 plt.plot(history.history['val_accuracy'], label='val_accuracy')

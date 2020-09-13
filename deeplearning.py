@@ -1,5 +1,6 @@
 # pylint: disable=E1101
 
+import os
 import random
 
 import tensorflow as tf
@@ -23,15 +24,16 @@ class Network:
 
     @classmethod
     def from_model(cls, file_name: str):
-        p = tf.keras.models.load_model(file_name)
+        model = os.path.join('trained_models', 'digits', file_name)
+        loaded_model = tf.keras.models.load_model(model)
         input_shape = None
         layers = []
-        for layer in p.layers:
+        for layer in loaded_model.layers:
             if 'Flatten' in str(layer):
                 input_shape = layer.input_shape[1:]
             elif 'Dense' in str(layer):
                 layers.append([layer.units, layer.activation.__name__])
-        return cls(input_shape=input_shape, layers=layers, model=tf.keras.models.load_model(file_name))
+        return cls(input_shape=input_shape, layers=layers, model=loaded_model)
 
     def load_data(self):
         x_train, y_train, x_test, y_test = load_data()
@@ -66,7 +68,7 @@ class Network:
         print(f'loss -> {val_loss}\naccuracy -> {val_accuracy}')
 
     def save_model(self, file_name: str):
-        self.model.save(file_name)
+        self.model.save(os.path.join('trained_models', file_name))
 
     def predict(self, image_nr: int) -> int:
         predictions = self.model.predict([self.test_data])
@@ -94,9 +96,9 @@ def load_data():
 
 
 class GUI:
-    def __init__(self, model='test.h5'):
+    def __init__(self, model='5pochs.h5'):
         self.window = tk.Tk()
-        self.window.title = 'Predicting images+'
+        self.window.title = 'Predicting images'
         self.net = Network.from_model(model)
         self.test_data, _ = self.net.get_test_data()
         self.figure = None
@@ -132,7 +134,7 @@ class GUI:
             if fig[0] == event.inaxes:
                 label, prediction = self.net.predict(fig[1])
                 messagebox.showinfo(
-                    'Prediction', f'I predicted: {prediction}\nTrue number: {label}')
+                    'Prediction', f'Prediction: {prediction}\nTrue number: {label}')
 
     def new_images(self):
         self.top_frame.destroy()
@@ -144,8 +146,7 @@ class GUI:
         return random.randrange(len(self.test_data) - 9)
 
 
-# gui = GUI()
-# gui.gui(gui.get_random_nr())
+gui = GUI('10epochs.h5')
 
 
 # net = Network.from_model('test.h5')

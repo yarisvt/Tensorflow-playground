@@ -1,3 +1,5 @@
+import os
+
 import tensorflow as tf
 
 from tensorflow.keras import datasets, layers, models
@@ -38,6 +40,7 @@ model.compile(optimizer='adam',
               metrics=['accuracy'])
 history = model.fit(train_images, train_labels, epochs=10,
                     validation_data=(test_images, test_labels))
+model.save(os.path.join('trained_models', '10epochs_cnn.h5'))
 
 plt.plot(history.history['accuracy'], label='accuracy')
 plt.plot(history.history['val_accuracy'], label='val_accuracy')

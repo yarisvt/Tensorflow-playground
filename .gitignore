@@ -1,2 +1,3 @@
-tensorflow-demo/
+.vscode/
+env/
 __pycache__/
